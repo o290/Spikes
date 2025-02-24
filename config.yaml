@@ -1,0 +1,30 @@
+config:
+  system:
+    name: miaosha_system
+    host: 127.0.0.1
+    port: 8080
+    env: dev
+  mysql:
+    host: 127.0.0.1
+    port: "3306"
+    db: miaosha_system
+    user: root
+    pwd: qwer0209
+    log_level: dev
+    config: charset=utf8mb4&parseTime=True&loc=Local
+  redis:
+    addr: 127.0.0.1:6379
+    pwd: "123456"
+    db: 1
+  logger:
+    level: info
+    prefix: '[miaosha_system]'
+    director: log
+    show-line: true
+    log-in-console: true
+  jwt:
+    signing-key: gin_storage12345
+    expire-time: 3600
+    issuer: gin_storage
+
+
