@@ -8,7 +8,7 @@ import (
 func OrderRouterInit(r *gin.Engine) {
 	orderRouters := r.Group("/order")
 	{
-		//秒杀前要限流
 		orderRouters.POST("/spikes", (&order.OrderController{}).Spikes)
+		orderRouters.POST("/close", (&order.OrderController{}).CloseOrder)
 	}
 }

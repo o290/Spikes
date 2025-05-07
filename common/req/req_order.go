@@ -1,7 +1,13 @@
 package req
 
-// 秒杀请求
+// SpikesRequest 秒杀请求
 type SpikesRequest struct {
 	UserID uint `json:"userID"`
 	GoodID uint `json:"goodID"`
+}
+
+// CloseRequest 手动关闭订单请求
+type CloseRequest struct {
+	UserID  uint `json:"userID"`
+	OrderID uint `json:"orderID"`
 }

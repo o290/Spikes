@@ -22,7 +22,7 @@ const closeKey = "timeout_close"
 
 func (m *CloseOrderMQ) Send(orderID string) error {
 	err := global.Redis.ZAdd(context.Background(), closeKey, redis.Z{
-		Score:  float64(time.Now().Unix() + 10),
+		Score:  float64(time.Now().Unix() + 60*4),
 		Member: orderID,
 	}).Err()
 	if err != nil {

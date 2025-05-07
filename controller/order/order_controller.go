@@ -168,18 +168,58 @@ func (o *OrderController) GetOrderInfo(orderID string) (order model.OrderModel, 
 	return
 }
 
-// CloseOrder 关闭订单
-func (o *OrderController) CloseOrder(order model.OrderModel) {
+// CloseOrder 手动关闭订单，状态必须是未完成且没有关闭
+func (o *OrderController) CloseOrder(c *gin.Context) {
+	var req req.CloseRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		global.Log.Error("解析失败")
+		c.JSON(http.StatusOK, gin.H{
+			"message": "数据解析失败",
+		})
+		return
+	}
+	//判断订单是不是自己的
+	var order model.OrderModel
+	err := global.DB.Where("id=?", req.OrderID).Take(&order).Error
+	if err != nil {
+		global.Log.Info("订单信息获取失败")
+		c.JSON(http.StatusOK, gin.H{
+			"message": "订单信息获取失败",
+		})
+		return
+	}
+	if order.UserID != req.UserID {
+		global.Log.Info("不是该用户的订单")
+		c.JSON(http.StatusOK, gin.H{
+			"message": "不是你的订单",
+		})
+		return
+	}
 	//判断订单的状态
 	if order.Status != 1 {
-		fmt.Println("订单已完成")
-		//移除订单
-		mq.CloseMQ.Remove(order.OrderNumber)
+		global.Log.Info("订单已完成或已关闭")
+		c.JSON(http.StatusOK, gin.H{
+			"message": "订单已完成或已关闭",
+		})
+		return
 	}
 	//关闭订单
-	//增加库存
-	//删除订单缓存
+	err = o.CloseUpdateStock(order)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "关闭订单操作失败",
+		})
+		return
+	}
+	//删除订单信息缓存
+	err = global.Redis.Del(context.Background(), fmt.Sprintf("order:%d:%d", order.UserID, order.GoodID)).Err()
+	if err != nil {
+		global.Log.Printf("删除订单ID为%d的订单信息缓存失败: %v", order.ID, err)
+		return
+	}
 	//移除订单
+	mq.CloseMQ.Remove(order.OrderNumber)
+	return
 }
 func (o *OrderController) CloseUpdateStock(order model.OrderModel) (err error) {
 	return global.DB.Transaction(func(tx *gorm.DB) error {
@@ -221,5 +261,5 @@ func (o *OrderController) CloseUpdateStock(order model.OrderModel) (err error) {
 //		//
 //	})
 //	//移除订单
-//	mq.CloseMQ.Remove(order.OrderNumber)
+//	//mq.CloseMQ.Remove(order.OrderNumber)
 //}
