@@ -192,7 +192,13 @@ func (o *OrderController) CloseUpdateStock(order model.OrderModel) (err error) {
 			global.Log.Errorf("回滚库存时未影响任何行, 商品ID: %v", order.GoodID)
 			return errors.New("加库存失败")
 		}
-
+		// 更新缓存库存
+		var goodController good.GoodControllerr
+		_, err = goodController.IncrStock(order.GoodID)
+		if err != nil {
+			global.Log.Errorf("更新缓存库存时出错, err: %v, 商品ID: %v", err, order.GoodID)
+			return err
+		}
 		// 修改订单信息状态为关闭状态
 		result = tx.Model(&model.OrderModel{}).Where("order_number=?", order.OrderNumber).Update("status", 0)
 		if result.Error != nil {

@@ -79,6 +79,7 @@ func (m *CloseOrderMQ) Receive() {
 			if err != nil {
 				return
 			}
+
 			//删除订单信息缓存
 			err = global.Redis.Del(context.Background(), fmt.Sprintf("order:%d:%d", orderInfo.UserID, orderInfo.GoodID)).Err()
 			if err != nil {
