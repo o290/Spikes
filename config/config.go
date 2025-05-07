@@ -5,4 +5,5 @@ type Config struct {
 	System System
 	Logger Logger
 	Redis  Redis
+	JWT    Jwt
 }

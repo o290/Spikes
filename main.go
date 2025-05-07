@@ -11,6 +11,7 @@ import (
 	"miaosha-system/model"
 	"miaosha-system/mq"
 	"miaosha-system/routers"
+	"miaosha-system/utils/jwt"
 )
 
 type Options struct {
@@ -26,8 +27,7 @@ func main() {
 	global.DB = core.Initgorm()
 	//连接redis
 	global.Redis = core.InitRedis(global.Config.Redis.Addr, global.Config.Redis.Pwd, global.Config.Redis.DB)
-
-	fmt.Println(global.Config.System)
+	jwt.InitJWT()
 	//表结构迁移
 	var opt Options
 	flag.BoolVar(&opt.DB, "db", false, "db")

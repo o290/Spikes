@@ -291,3 +291,18 @@ func (m GoodControllerr) IncrStock(id uint) (stock int64, err error) {
 	}
 	return
 }
+
+func (m GoodControllerr) TestToken(c *gin.Context) {
+	id, exists := c.Get("user_id")
+	if !exists {
+		global.Log.Error("未获取到用户 ID")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "未获取到用户 ID",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"id": id,
+	})
+	fmt.Println("用户id：", id)
+}
