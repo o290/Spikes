@@ -181,9 +181,9 @@ func (o *OrderController) CloseOrder(order model.OrderModel) {
 	//删除订单缓存
 	//移除订单
 }
-func Close(order model.OrderModel) (err error) {
+func (o *OrderController) CloseUpdateStock(order model.OrderModel) (err error) {
 	return global.DB.Transaction(func(tx *gorm.DB) error {
-		result := tx.Model(&struct{}{}).Where("id=?", order.GoodID).UpdateColumn("stock", gorm.Expr("stock+?", 1))
+		result := tx.Model(&model.GoodModel{}).Where("id=?", order.GoodID).UpdateColumn("stock", gorm.Expr("stock+?", 1))
 		if result.Error != nil {
 			global.Log.Errorf("回滚库存时出错, err: %v, 商品ID: %v", result.Error, order.GoodID)
 			return result.Error
@@ -193,8 +193,8 @@ func Close(order model.OrderModel) (err error) {
 			return errors.New("加库存失败")
 		}
 
-		// 修改订单信息状态
-		result = tx.Model(&model.OrderModel{}).Where("order_id = ? AND status = ?", order.ID, order.Status).Update("status", 0)
+		// 修改订单信息状态为关闭状态
+		result = tx.Model(&model.OrderModel{}).Where("order_number=?", order.OrderNumber).Update("status", 0)
 		if result.Error != nil {
 			log.Printf("修改订单状态时出错, err: %v", result.Error)
 			return result.Error

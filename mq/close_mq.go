@@ -37,9 +37,9 @@ func (m *CloseOrderMQ) Send(orderID string) error {
 func (m *CloseOrderMQ) Remove(orderID string) {
 	err := global.Redis.ZRem(context.Background(), closeKey, orderID).Err()
 	if err != nil {
-		global.Log.Errorf("订单%s移除延迟队列失败", err)
+		global.Log.Errorf("订单%v移除延迟队列失败", err)
 	} else {
-		global.Log.Infof("订单%s移除延迟队列成功", err)
+		global.Log.Infof("订单%s移除延迟队列成功", orderID)
 	}
 	return
 }
@@ -71,13 +71,24 @@ func (m *CloseOrderMQ) Receive() {
 			return
 		}
 		//订单关闭处理
-		fmt.Println("关闭订单", orderInfo.OrderNumber)
+		//判断订单状态
+		if orderInfo.Status != 2 {
+			global.Log.Infof("订单%s超时，需移除超时队列", orderInfo.OrderNumber)
+			//修改数据库库存
+			err = m.Order.CloseUpdateStock(orderInfo)
+			if err != nil {
+				return
+			}
+			//删除订单信息缓存
+			err = global.Redis.Del(context.Background(), fmt.Sprintf("order:%d:%d", orderInfo.UserID, orderInfo.GoodID)).Err()
+			if err != nil {
+				global.Log.Printf("删除订单信息缓存【%s】失败: %v", orderInfo.OrderNumber, err)
+				return
+			}
+			m.Remove(orderInfo.OrderNumber)
+		}
+
 		return
-		//if err = m.Order.CloseOrder(orderInfo.UserId, orderInfo.OrderId); err != nil {
-		//	log.Printf("orderService.CloseOrder() failed, orderId: %s, err: %v", err)
-		//	return
-		//}
-		//log.Printf("订单【%s】已关闭", orderInfo.OrderId)
 	}
 
 }
