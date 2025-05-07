@@ -1,0 +1,28 @@
+package inter
+
+import (
+	"github.com/gin-gonic/gin"
+	"miaosha-system/model"
+)
+
+var (
+	OrderController Order
+	GoodController  Good
+)
+
+func GetOrder() Order {
+	return OrderController
+}
+
+type Order interface {
+	Spikes(c *gin.Context)
+	CreateOrder(userID, goodID uint) (err error)
+	GenerateOrderID(userID, productID uint) string
+	GetOrderInfo(orderID string) (order model.OrderModel, err error)
+}
+type Good interface {
+	//init() (err error)
+	GoodAdd(c *gin.Context)
+	GoodList(c *gin.Context)
+	GetGoodDetail(c *gin.Context)
+}
