@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"log"
 	"miaosha-system/global"
 	"time"
 )
@@ -18,14 +17,14 @@ var (
 // InitJWT 初始化 JWT 配置
 func InitJWT() {
 	if global.Config == nil {
-		log.Fatalf("配置信息未初始化")
+		global.Log.Fatalf("配置信息未初始化")
 	}
 	if global.Config.JWT.SignKey == "" {
-		log.Fatalf("JWT 签名密钥未配置")
+		global.Log.Fatalf("JWT 签名密钥未配置")
 	}
 	SigningKey = []byte(global.Config.JWT.SignKey)
-	ExpireTime = time.Duration(global.Config.JWT.ExpireTime) * time.Second
-	fmt.Println("JWT 配置初始化成功")
+	ExpireTime = time.Duration(global.Config.JWT.ExpireTime) * time.Minute
+	global.Log.Info("JWT 配置初始化成功")
 }
 
 // Claims 定义 JWT 的 Claims 结构体

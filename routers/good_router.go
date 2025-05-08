@@ -9,11 +9,11 @@ import (
 func GoodRouterInit(r *gin.Engine) {
 	goodRouters := r.Group("/good")
 	{
-		goodRouters.Use(middle.AuthMiddleware())
 		goodRouters.GET("/test", good.GoodControllerr{}.TestToken)
 		goodRouters.GET("/list", good.GoodControllerr{}.GoodList)
-		//goodRouters.GET("/good", good.GoodControllerr{}.GetGood)
-		goodRouters.POST("/good", good.GoodControllerr{}.GoodAdd)
+		goodRouters.Use(middle.AuthMiddleware())
 		goodRouters.GET("/detail/:id", good.GoodControllerr{}.GetGoodDetail)
+		goodRouters.POST("/good", good.GoodControllerr{}.GoodAdd)
+
 	}
 }

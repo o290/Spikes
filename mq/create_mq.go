@@ -29,7 +29,7 @@ func (m *CreateOderMQ) Receive() {
 		result, err := global.Redis.BRPop(context.Background(), 2*time.Second, "create_mq").Result()
 		if err != nil {
 			if err == redis.Nil {
-				fmt.Println("创建订单消息队列中暂无订单，等待中...")
+				//fmt.Println("创建订单消息队列中暂无订单，等待中...")
 			} else {
 				global.Log.Printf("处理订单时出错: %v", err)
 			}
