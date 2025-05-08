@@ -20,12 +20,14 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const idInput = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const msg = ref('')
 const isRegister = ref(false)
+const router = useRouter()
 
 const emit = defineEmits(['close', 'login'])
 
@@ -53,7 +55,9 @@ async function login() {
 
         // 保存 Token 到本地存储
         localStorage.setItem('token', token)
-
+        localStorage.setItem('nickname', nickName)
+        const redirect = router.currentRoute.value.query.redirect || '/'
+        router.push(redirect)
         setTimeout(() => {
           msg.value = ''
           emit('login', nickName)

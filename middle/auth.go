@@ -12,6 +12,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从请求头中获取 Token
 		tokenString := c.GetHeader("Authorization")
+		fmt.Println(tokenString)
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "未提供 Token",
