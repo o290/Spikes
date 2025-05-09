@@ -9,6 +9,7 @@
     <p>秒杀开始时间：{{ formatDateTime(product.startTime) }}</p>
     <p>秒杀结束时间：{{ formatDateTime(product.endTime) }}</p>
     <button @click="$emit('view-detail', product.goodID)">查看详情</button>
+    <!-- <button @click="handleViewDetail">查看详情</button> -->
   </div>
 </template>
 
@@ -16,6 +17,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 const props = defineProps({ product: Object })
 const countdownText = ref('')
+
 
 function formatDateTime(dateStr) {
   if (!dateStr) return ''

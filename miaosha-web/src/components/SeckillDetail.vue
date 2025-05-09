@@ -32,12 +32,23 @@ const msg = ref('')
 let timer
 
 onMounted(async () => {
-  // 从后端获取商品详情
-  const id = route.params.id
-  const res = await axios.get(`/api/good/detail/${id}`)
-  product.value = res.data
-  updateCountdown()
-  timer = setInterval(updateCountdown, 1000)
+  // 从路由的 query 参数中获取商品 ID
+  const goodID = route.query.goodID
+  console.log('获取到的商品 ID:', goodID)
+  if (goodID) {
+    try {
+      const res = await axios.get(`/api/good/detail?goodID=${goodID}`)
+      product.value = res.data
+      updateCountdown()
+      timer = setInterval(updateCountdown, 1000)
+    } catch (error) {
+      console.error('获取商品详情失败', error)
+      msg.value = '获取商品详情失败，请稍后重试'
+    }
+  } else {
+    console.error('未获取到商品 ID')
+    msg.value = '未获取到商品 ID，请检查链接'
+  }
 })
 
 function updateCountdown() {

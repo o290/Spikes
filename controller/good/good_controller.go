@@ -161,7 +161,8 @@ func (m GoodControllerr) GoodList(c *gin.Context) {
 
 // GetGood 根据商品 ID 获取商品信息 首先从缓存中获取，没有从数据库中获取
 func (m GoodControllerr) GetGoodDetail(c *gin.Context) {
-	goodIDStr := c.Param("id")
+	goodIDStr := c.Query("goodID")
+	fmt.Println(goodIDStr)
 	if goodIDStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "goodID parameter is missing",

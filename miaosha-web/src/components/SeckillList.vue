@@ -21,25 +21,13 @@ import axios from 'axios'
 const products = ref([])
 const router = useRouter()
 
-// 配置axios请求拦截器，确保每个请求都携带token
-axios.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
-    }
-    return config
-  },
-  error => {
-    return Promise.reject(error)
-  }
-)
 
 onMounted(async () => {
   try {
     const res = await axios.get('/api/good/list')
     console.log('接口返回内容:', res.data)
     products.value = res.data?.response?.list || []
+    console.log('商品列表:', products.value[0].goodID)  
   } catch (error) {
     if (error.response && error.response.status === 401) {
       // 401状态码表示未授权，通常是token无效或过期，这里可以引导用户重新登录
@@ -53,7 +41,15 @@ onMounted(async () => {
 })
 
 function viewDetail(id) {
-  router.push(`/detail/${id}`)
+  console.log('查看详情的商品ID:', id)
+  try {
+    router.push({
+      name: 'SeckillDetail',
+      query: { goodID: goodID }
+    });
+  } catch (error) {
+    console.error('viewDetail函数执行出错', error);
+  }
 }
 </script>
 
