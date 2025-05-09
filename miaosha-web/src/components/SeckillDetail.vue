@@ -37,7 +37,11 @@ onMounted(async () => {
   console.log('获取到的商品 ID:', goodID)
   if (goodID) {
     try {
-      const res = await axios.get(`/api/good/detail?goodID=${goodID}`)
+      const res = await axios.get(`/api/good/detail?goodID=${goodID}`,{
+        headers:{
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
       product.value = res.data
       updateCountdown()
       timer = setInterval(updateCountdown, 1000)

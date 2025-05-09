@@ -3,6 +3,7 @@ package middle
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"miaosha-system/global"
 	"miaosha-system/utils/jwt"
 	"net/http"
 )
@@ -12,15 +13,14 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从请求头中获取 Token
 		tokenString := c.GetHeader("Authorization")
-		fmt.Println(tokenString)
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "未提供 Token",
 			})
 			c.Abort()
+			global.Log.Info("auth133331")
 			return
 		}
-
 		// 去除 Token 前缀 "Bearer "
 		if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
 			tokenString = tokenString[7:]

@@ -16,6 +16,7 @@ func initService() {
 func Init() (r *gin.Engine) {
 	initService()
 	r = gin.Default()
+	//r.Use(middle.Cors())
 	UserRouterInit(r)
 	GoodRouterInit(r)
 	OrderRouterInit(r)

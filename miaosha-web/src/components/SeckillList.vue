@@ -45,7 +45,7 @@ function viewDetail(id) {
   try {
     router.push({
       name: 'SeckillDetail',
-      query: { goodID: goodID }
+      query: { goodID: id }
     });
   } catch (error) {
     console.error('viewDetail函数执行出错', error);
