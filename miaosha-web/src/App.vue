@@ -17,7 +17,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import LoginModal from './components/LoginModal.vue'
-
 const showLogin = ref(false)
 const isLogin = ref(false)
 const nickName = ref('')

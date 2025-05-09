@@ -30,10 +30,7 @@ onMounted(async () => {
     console.log('商品列表:', products.value[0].goodID)  
   } catch (error) {
     if (error.response && error.response.status === 401) {
-      // 401状态码表示未授权，通常是token无效或过期，这里可以引导用户重新登录
       console.error('未授权，请重新登录', error)
-      // 可以添加跳转到登录页的逻辑，例如：
-      // router.push('/login')
     } else {
       console.error('获取商品列表数据失败', error)
     }

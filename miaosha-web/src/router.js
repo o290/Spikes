@@ -19,7 +19,6 @@ const router = createRouter({
 // 全局前置守卫，检查用户是否登录
 router.beforeEach((to, from, next) => {
   const isLoggedIn = localStorage.getItem('token') !== null;
-  // 使用 to.name 准确判断是否跳转到商品详情页
   if (to.name === 'SeckillDetail' && !isLoggedIn) { 
     alert('请先登录！');
     next({

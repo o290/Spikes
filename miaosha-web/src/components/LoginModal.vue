@@ -56,6 +56,7 @@ async function login() {
         // 保存 Token 到本地存储
         localStorage.setItem('token', token)
         localStorage.setItem('nickname', nickName)
+        emit('login', nickName)
         const redirect = router.currentRoute.value.query.redirect || '/'
         router.push(redirect)
         setTimeout(() => {
