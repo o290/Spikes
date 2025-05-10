@@ -2,7 +2,7 @@ package req
 
 // SpikesRequest 秒杀请求
 type SpikesRequest struct {
-	UserID uint `json:"userID"`
+	//UserID uint `json:"userID"`
 	GoodID uint `json:"goodID"`
 }
 
@@ -10,4 +10,9 @@ type SpikesRequest struct {
 type CloseRequest struct {
 	UserID  uint `json:"userID"`
 	OrderID uint `json:"orderID"`
+}
+
+type GetOrderListRequest struct {
+	Page  int `form:"page,optional"`
+	Limit int `form:"limit,optional"`
 }

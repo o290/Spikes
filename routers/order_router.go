@@ -8,6 +8,8 @@ import (
 func OrderRouterInit(r *gin.Engine) {
 	orderRouters := r.Group("/order")
 	{
+		//orderRouters.Use(middle.Auth())
+		orderRouters.GET("/list", (&order.OrderController{}).GetOrderList)
 		orderRouters.POST("/spikes", (&order.OrderController{}).Spikes)
 		orderRouters.POST("/close", (&order.OrderController{}).CloseOrder)
 	}

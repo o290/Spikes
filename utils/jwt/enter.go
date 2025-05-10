@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"miaosha-system/global"
+	"net/http"
 	"time"
 )
 
@@ -81,4 +83,31 @@ func ParseToken(tokenString string) (*Claims, error) {
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+func GetUserID(c *gin.Context) (uint, error) {
+	//从token中解析出的userid
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		global.Log.Info("无效token")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "未提供 Token",
+		})
+		return 0, errors.New("获取id失败")
+	}
+	// 去除 Token 前缀 "Bearer "
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	// 解析 Token
+	claims, err := ParseToken(token)
+	if err != nil {
+		global.Log.Info("token解析失败")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "无效的 Token",
+		})
+		return 0, errors.New("获取id失败")
+	}
+	return claims.UserID, nil
 }

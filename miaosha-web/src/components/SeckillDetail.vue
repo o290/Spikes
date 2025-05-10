@@ -72,9 +72,14 @@ onUnmounted(() => clearInterval(timer))
 
 async function seckill() {
   try {
-    const res = await axios.post('/api/order', {
-      productId: product.value.id
-    })
+    const res = await axios.post('/api/order/spikes', 
+      { goodID: product.value.id },
+      {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }
+    )
     msg.value = '秒杀成功！请到订单页支付'
     setTimeout(() => router.push('/orders'), 1000)
   } catch (e) {

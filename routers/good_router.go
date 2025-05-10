@@ -12,7 +12,7 @@ func GoodRouterInit(r *gin.Engine) {
 		goodRouters.GET("/test", good.GoodControllerr{}.TestToken)
 		goodRouters.GET("/list", good.GoodControllerr{}.GoodList)
 		authGroup := goodRouters.Group("")
-		authGroup.Use(middle.AuthMiddleware())
+		authGroup.Use(middle.Auth())
 		authGroup.GET("/detail", good.GoodControllerr{}.GetGoodDetail)
 		authGroup.POST("/good", good.GoodControllerr{}.GoodAdd)
 

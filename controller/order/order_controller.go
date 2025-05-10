@@ -7,13 +7,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
+	"miaosha-system/common"
 	"miaosha-system/common/msg"
 	"miaosha-system/common/req"
+	"miaosha-system/common/res"
 	"miaosha-system/controller/good"
 	"miaosha-system/global"
 	"miaosha-system/inter"
 	"miaosha-system/model"
 	"miaosha-system/mq"
+	"miaosha-system/utils/jwt"
 	"miaosha-system/utils/lock"
 	"net/http"
 	"strconv"
@@ -42,8 +45,93 @@ type OrderController struct {
 //7.删除订单信息的缓存
 //8加锁，释放锁
 
+func (o *OrderController) GetOrderList(c *gin.Context) {
+	var req req.GetOrderListRequest
+	//根据userid获取和用户相关的订单，从数据库中获取
+	userID, err := jwt.GetUserID(c)
+	if err != nil {
+		global.Log.Error("用户id获取失败", err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": err,
+		})
+		return
+	}
+	var info common.PageInfo
+	if req.Page <= 0 {
+		info.Page = 1
+	}
+	if req.Limit != -1 { //-1查全部
+		if req.Limit <= 0 {
+			info.Limit = 10
+		} else {
+			info.Limit = req.Limit
+		}
+	}
+	offset := (info.Page - 1) * info.Limit
+	//根据开始时间降序排序
+	var orderList []model.OrderModel
+	err = global.DB.Preload("UserModel").Preload("GoodModel").Order("created_at desc").Where("user_id=?", userID).Limit(info.Limit).Offset(offset).Find(&orderList).Error
+	if err != nil {
+		global.Log.Error("获取商品列表失败", err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "get good list  error",
+		})
+		return
+	}
+	//求总数
+	var count int64
+	err = global.DB.Model(model.GoodModel{}).Count(&count).Error
+	if err != nil {
+		global.Log.Error("获取订单数目失败", err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "get good list  error",
+		})
+		return
+	}
+
+	var list = make([]res.OrderInfoResponse, 0)
+	for _, orderModel := range orderList {
+		order := res.OrderInfoResponse{
+			ID:          orderModel.ID,
+			OrderNumber: orderModel.OrderNumber,
+			BuyerID:     orderModel.UserID,
+			BuyerName:   orderModel.UserModel.Nickname,
+			GoodID:      orderModel.GoodID,
+			GoodName:    orderModel.GoodModel.Name,
+			Img:         orderModel.GoodModel.Img,
+			GoodPrice:   orderModel.GoodModel.Price,
+			ActualPay:   orderModel.ActualPayment,
+			PayWay:      1,
+			Number:      orderModel.GoodNumber,
+			CreatedAt:   orderModel.CreatedAt.Format("20060102"),
+			UpdatedAt:   orderModel.UpdatedAt.Format("20060102"),
+			Status:      orderModel.Status,
+		}
+
+		list = append(list, order)
+	}
+
+	response := res.OrderInfoListResponse{
+		List:  list,
+		Count: int(count),
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"response": response,
+	})
+	return
+}
+
 // Spikes 秒杀
 func (o *OrderController) Spikes(c *gin.Context) {
+	//根据userid获取和用户相关的订单，从数据库中获取
+	userID, err := jwt.GetUserID(c)
+	if err != nil {
+		global.Log.Error("用户id获取失败", err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": err,
+		})
+		return
+	}
 	var req req.SpikesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		global.Log.Error("解析失败")
@@ -54,7 +142,7 @@ func (o *OrderController) Spikes(c *gin.Context) {
 	}
 	//判断用户是否存在
 	var user model.UserModel
-	err := global.DB.Model(&model.UserModel{}).Where("id = ?", req.UserID).Take(&user).Error
+	err = global.DB.Model(&model.UserModel{}).Where("id = ?", userID).Take(&user).Error
 	if err != nil {
 		global.Log.Error("不存在该用户")
 		c.JSON(http.StatusOK, gin.H{
@@ -83,7 +171,7 @@ func (o *OrderController) Spikes(c *gin.Context) {
 		return
 	}
 	//判断用户是否重复秒杀
-	err = global.Redis.Get(context.Background(), fmt.Sprintf("order:%d:%d", req.UserID, req.GoodID)).Err()
+	err = global.Redis.Get(context.Background(), fmt.Sprintf("order:%d:%d", userID, req.GoodID)).Err()
 	if err == nil {
 		global.Log.Infof("用户秒杀次数已达上限")
 		c.JSON(http.StatusOK, gin.H{
@@ -92,12 +180,12 @@ func (o *OrderController) Spikes(c *gin.Context) {
 		return
 	}
 	//获取锁
-	_, acquired, err := lock.AcquireLock(context.Background(), fmt.Sprintf("lock:%d", req.GoodID), 5*time.Second, req.UserID, req.GoodID)
+	_, acquired, err := lock.AcquireLock(context.Background(), fmt.Sprintf("lock:%d", req.GoodID), 5*time.Second, userID, req.GoodID)
 	if err != nil || !acquired {
-		fmt.Printf("用户 %d 获取商品%d的分布式锁失败: %v\n", req.UserID, req.GoodID, err)
+		fmt.Printf("用户 %d 获取商品%d的分布式锁失败: %v\n", userID, req.GoodID, err)
 		return
 	}
-	fmt.Printf("用户 %d 获取锁成功\n", req.UserID)
+	fmt.Printf("用户 %d 获取锁成功\n", userID)
 	//预减库存
 	stock, _ := global.Redis.Decr(context.Background(), fmt.Sprintf("stock:%d", req.GoodID)).Result()
 	if stock < 0 {
@@ -109,7 +197,7 @@ func (o *OrderController) Spikes(c *gin.Context) {
 	}
 	//构造创建订单消息
 	msg := msg.CreateMsg{
-		UserID: req.UserID,
+		UserID: userID,
 		GoodID: req.GoodID,
 	}
 	mq.CreateMQ.Send(msg)

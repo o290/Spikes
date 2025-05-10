@@ -3,13 +3,12 @@ package middle
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"miaosha-system/global"
 	"miaosha-system/utils/jwt"
 	"net/http"
 )
 
 // AuthMiddleware 验证 Token 的中间件
-func AuthMiddleware() gin.HandlerFunc {
+func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从请求头中获取 Token
 		tokenString := c.GetHeader("Authorization")
@@ -18,7 +17,6 @@ func AuthMiddleware() gin.HandlerFunc {
 				"message": "未提供 Token",
 			})
 			c.Abort()
-			global.Log.Info("auth133331")
 			return
 		}
 		// 去除 Token 前缀 "Bearer "
