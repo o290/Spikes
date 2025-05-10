@@ -64,7 +64,7 @@ func (m *CloseOrderMQ) Receive() {
 			continue
 		}
 		//获取订单信息
-		orderInfo, err1 := m.Order.GetOrderInfo(list[0])
+		orderInfo, err1 := m.Order.GetOrder(list[0])
 		fmt.Println(list)
 		if err1 != nil {
 			global.Log.Errorf("获取订单信息失败: %v", err)

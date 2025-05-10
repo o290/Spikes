@@ -18,7 +18,7 @@ type Order interface {
 	Spikes(c *gin.Context)
 	CreateOrder(userID, goodID uint) (err error)
 	GenerateOrderID(userID, productID uint) string
-	GetOrderInfo(orderID string) (order model.OrderModel, err error)
+	GetOrder(orderID string) (order model.OrderModel, err error)
 	CloseUpdateStock(order model.OrderModel) (err error)
 }
 type Good interface {

@@ -3,12 +3,15 @@ import SeckillList from './components/SeckillList.vue';
 import SeckillDetail from './components/SeckillDetail.vue';
 import OrderList from './components/OrderList.vue';
 import LoginModal from './components/LoginModal.vue';
+import OrderDetail from './components/OrderDetail.vue'; 
+// 这里是你的路由配置
 
 const routes = [
   { path: '/', component: SeckillList },
   { path: '/detail', component: SeckillDetail, name: 'SeckillDetail' }, 
   { path: '/orders', component: OrderList },
-  { path: '/login', component: LoginModal }
+  { path: '/login', component: LoginModal },
+  {path:'/order/detail',component:OrderDetail,name:'OrderDetail'}, // 添加订单详情路由
 ];
 
 const router = createRouter({

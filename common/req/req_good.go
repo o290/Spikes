@@ -7,7 +7,7 @@ type GoodListRequest struct {
 	//Key   string `form:"key,optional"`
 }
 
-// 添加商品 只有商家才可以
+// GoodAddRequest 添加商品 只有商家才可以
 type GoodAddRequest struct {
 	GoodName    string  `json:"goodName"`
 	Img         string  `json:"img"`

@@ -35,11 +35,6 @@ func OrderInit() {
 type OrderController struct {
 }
 
-//2.获取订单列表
-//3.获取订单信息
-
-//4.超时关闭订单
-
 //5.获取秒杀结果：preload预加载商品信息
 //6.将订单信息添加到缓存
 //7.删除订单信息的缓存
@@ -103,8 +98,8 @@ func (o *OrderController) GetOrderList(c *gin.Context) {
 			ActualPay:   orderModel.ActualPayment,
 			PayWay:      1,
 			Number:      orderModel.GoodNumber,
-			CreatedAt:   orderModel.CreatedAt.Format("20060102"),
-			UpdatedAt:   orderModel.UpdatedAt.Format("20060102"),
+			CreatedAt:   orderModel.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:   orderModel.UpdatedAt.Format("2006-01-02 15:04:05"),
 			Status:      orderModel.Status,
 		}
 
@@ -251,7 +246,67 @@ func (o *OrderController) GenerateOrderID(userID, productID uint) string {
 }
 
 // GetOrderInfo 获取订单信息
-func (o *OrderController) GetOrderInfo(orderID string) (order model.OrderModel, err error) {
+func (o *OrderController) GetOrderInfo(c *gin.Context) {
+	//获取用户id
+	userID, err := jwt.GetUserID(c)
+	if err != nil {
+		global.Log.Error("用户id获取失败", err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": err,
+		})
+		return
+	}
+	orderStr := c.Query("orderID")
+	if orderStr == "" {
+		global.Log.Info("orderID参数获取失败")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "orderID parameter is missing",
+		})
+		return
+	}
+	var orderID uint
+	_, err = fmt.Sscanf(orderStr, "%d", &orderID)
+	var order model.OrderModel
+	err = global.DB.Preload("GoodModel").Preload("UserModel").Where("id=?", orderID).Take(&order).Error
+	if err != nil {
+		global.Log.Info("订单信息获取失败")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "订单信息获取失败",
+		})
+		return
+	}
+	if order.UserID != userID {
+		global.Log.Info("你不是订单购买者")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "你不是订单购买者",
+		})
+		return
+	}
+	orderRes := res.OrderInfoResponse{
+		ID:          order.ID,
+		OrderNumber: order.OrderNumber,
+		BuyerID:     order.UserID,
+		BuyerName:   order.UserModel.Nickname,
+		GoodID:      order.GoodID,
+		GoodName:    order.GoodModel.Name,
+		Img:         order.GoodModel.Img,
+		GoodPrice:   order.GoodModel.Price,
+		ActualPay:   order.ActualPayment,
+		PayWay:      1,
+		Number:      order.GoodNumber,
+		CreatedAt:   order.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:   order.UpdatedAt.Format("2006-01-02 15:04:05"),
+		Status:      order.Status,
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "获取订单信息成功",
+		"data":    orderRes,
+	})
+	return
+}
+
+// GetOrderInfo 获取订单信息
+func (o *OrderController) GetOrder(orderID string) (order model.OrderModel, err error) {
 	err = global.DB.Where("order_number=?", orderID).Take(&order).Error
 	return
 }

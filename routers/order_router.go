@@ -11,6 +11,7 @@ func OrderRouterInit(r *gin.Engine) {
 		//orderRouters.Use(middle.Auth())
 		orderRouters.GET("/list", (&order.OrderController{}).GetOrderList)
 		orderRouters.POST("/spikes", (&order.OrderController{}).Spikes)
+		orderRouters.GET("/detail", (&order.OrderController{}).GetOrderInfo)
 		orderRouters.POST("/close", (&order.OrderController{}).CloseOrder)
 	}
 }

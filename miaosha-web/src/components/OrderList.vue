@@ -23,7 +23,9 @@
             <td>{{ order.status === 0 ? '已取消' : order.status === 1 ? '未支付' : '已完成' }}</td>
             <td>{{ order.createdAt }}</td>
             <td>{{ order.updatedAt }}</td>
-            <router-link :to="`/order/detail/${order.id}`" class="view-detail-btn">查看详情</router-link>
+             <router-link :to="{ name: 'OrderDetail',query:{orderID:order.ID} }"class="detail-link" >
+              查看详情
+            </router-link>
           </tr>
         </tbody>
       </table>
@@ -46,6 +48,7 @@ onMounted(async () => {
   orders.value = res.data.response.list
   console.log(res.data.response.list)
 })
+
 </script>
   
   <style>

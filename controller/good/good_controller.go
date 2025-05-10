@@ -159,7 +159,7 @@ func (m GoodControllerr) GoodList(c *gin.Context) {
 	})
 }
 
-// GetGood 根据商品 ID 获取商品信息 首先从缓存中获取，没有从数据库中获取
+// GetGoodDetail 根据商品 ID 获取商品信息 首先从缓存中获取，没有从数据库中获取
 func (m GoodControllerr) GetGoodDetail(c *gin.Context) {
 	goodIDStr := c.Query("goodID")
 	if goodIDStr == "" {
