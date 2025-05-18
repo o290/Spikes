@@ -13,6 +13,9 @@ var (
 func GetOrder() Order {
 	return OrderController
 }
+func GetGood() Good {
+	return GoodController
+}
 
 type Order interface {
 	CreateOrder(userID, goodID uint) (err error)

@@ -12,8 +12,10 @@ import (
 
 // RefreshTask 定时刷新任务结构体
 type RefreshTask struct {
-	GoodController inter.Good
+	Good inter.Good
 }
+
+var Refresh *RefreshTask
 
 // Start 启动定时刷新任务
 func (t *RefreshTask) Start() {
@@ -74,7 +76,7 @@ func (t *RefreshTask) refreshGoodInfo() {
 
 	for _, good := range goodList {
 		// 将商品信息存入 Redis 缓存
-		err = t.GoodController.SetGoodToRedis(good)
+		err = t.Good.SetGoodToRedis(good)
 		if err != nil {
 			global.Log.Error("更新商品信息缓存失败", err)
 		}

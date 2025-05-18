@@ -3,7 +3,6 @@ package mq
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"miaosha-system/global"
 	"miaosha-system/inter"
@@ -22,23 +21,6 @@ var StockMQ *UpdateStockMQ
 
 const stockKey = "stock_update"
 const interval = 5 * time.Second
-
-//RecordStockToUpdate 记录需要更新库存的商品 ID
-func (m *UpdateStockMQ) RecordStockToUpdate(goodID uint) error {
-	// 获取当前时间戳作为分数
-	score := float64(time.Now().Unix())
-	// 将商品 ID 作为成员添加到有序集合中
-	err := global.Redis.ZAdd(context.Background(), stockKey, redis.Z{
-		Score:  score,
-		Member: goodID,
-	}).Err()
-	if err != nil {
-		global.Log.Error("需要更新库存的商品添加失败")
-	} else {
-		global.Log.Info("需要更新库存的商品添加成功")
-	}
-	return err
-}
 
 // PeriodicUpdateStock 定期更新库存的函数
 func (m *UpdateStockMQ) PeriodicUpdateStock() {

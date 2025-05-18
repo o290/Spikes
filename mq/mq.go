@@ -9,10 +9,15 @@ func Init() {
 	CloseMQ = &CloseOrderMQ{
 		Order: inter.GetOrder(),
 	}
-	StockMQ = &UpdateStockMQ{}
+	//StockMQ = &UpdateStockMQ{}
+	Refresh = &RefreshTask{
+		Good: inter.GetGood(),
+	}
 }
+
 func Run() {
 	go CreateMQ.Receive()
 	go CloseMQ.Receive()
-	go StockMQ.PeriodicUpdateStock()
+	//go StockMQ.PeriodicUpdateStock()
+	go Refresh.Start()
 }
