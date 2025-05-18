@@ -26,8 +26,6 @@ func AcquireLock(ctx context.Context, key string, expiration time.Duration, user
 				// 启动续期协程
 				go RenewLock(ctx, key, value, expiration)
 			} else {
-				//fmt.Printf("用户%d第%d次获取锁失败，错误信息: %v\n", userID, i+1, err)
-				// 等待一段时间后重试
 				time.Sleep(time.Second * 1)
 				continue
 			}
