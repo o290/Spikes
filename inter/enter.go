@@ -25,4 +25,5 @@ type Good interface {
 	GoodAdd(c *gin.Context)
 	GoodList(c *gin.Context)
 	GetGoodDetail(c *gin.Context)
+	SetGoodToRedis(good model.GoodModel) error
 }

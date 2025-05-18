@@ -262,7 +262,7 @@ func (m GoodControllerr) GetGoodFromRedis(id uint) (good model.GoodModel, err er
 // SetStock 将商品的库存信息存储到 Redis 中，不设置过期时间
 func (m GoodControllerr) SetStock(id uint, stock int) (err error) {
 	key := fmt.Sprintf("stock:%d", id)
-	if err = global.Redis.Set(context.Background(), key, stock, time.Minute*5).Err(); err != nil {
+	if err = global.Redis.Set(context.Background(), key, stock, 0).Err(); err != nil {
 		global.Log.Error("设置库存失败")
 		global.Log.Errorf("设置库存失败，键: %s，值: %d，错误信息: %v", key, stock, err)
 		return err
