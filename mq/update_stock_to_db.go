@@ -23,7 +23,7 @@ var StockMQ *UpdateStockMQ
 const stockKey = "stock_update"
 const interval = 5 * time.Second
 
-// RecordStockToUpdate 记录需要更新库存的商品 ID
+//RecordStockToUpdate 记录需要更新库存的商品 ID
 func (m *UpdateStockMQ) RecordStockToUpdate(goodID uint) error {
 	// 获取当前时间戳作为分数
 	score := float64(time.Now().Unix())

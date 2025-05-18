@@ -46,7 +46,7 @@ func main() {
 	}
 
 	gin.SetMode(gin.ReleaseMode)
-
+	go core.UpdatePublish()
 	r := gin.Default()
 	inter.OrderController = &order.OrderController{}
 	////表示加载templates目录下的文件夹下的文件

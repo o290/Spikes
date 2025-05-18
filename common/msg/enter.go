@@ -4,5 +4,4 @@ package msg
 type CreateMsg struct {
 	UserID uint
 	GoodID uint
-	//LockValue
 }

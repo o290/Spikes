@@ -36,8 +36,6 @@ type OrderController struct {
 }
 
 //5.获取秒杀结果：preload预加载商品信息
-//6.将订单信息添加到缓存
-//7.删除订单信息的缓存
 //8加锁，释放锁
 
 func (o *OrderController) GetOrderList(c *gin.Context) {
@@ -212,7 +210,7 @@ func (o *OrderController) CreateOrder(userID, goodID uint) (err error) {
 	//开启事务
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		var good model.GoodModel
-		result := tx.Where("id=? and stock>0", goodID).First(&good).Update("stock", gorm.Expr("stock-1"))
+		result := tx.Where("id=? and stock >0", goodID).First(&good).Update("stock", gorm.Expr("stock-1"))
 		if result.Error != nil {
 			return fmt.Errorf("减库存失败: %w", result.Error)
 		}
@@ -236,6 +234,21 @@ func (o *OrderController) CreateOrder(userID, goodID uint) (err error) {
 	}
 	// 加入订单超时延迟队列
 	mq.CloseMQ.Send(order.OrderNumber)
+
+	// 发布消息通知缓存服务更新缓存
+	channel := fmt.Sprintf("update_cache:%d", goodID)
+	var newGood model.GoodModel
+	err = global.DB.Where("id = ?", goodID).First(&newGood).Error
+	if err != nil {
+		global.Log.Printf("获取商品 %d 最新库存信息时出错: %v", goodID, err)
+		return err
+	}
+	message := fmt.Sprintf("%d", newGood.Stock)
+	err = global.Redis.Publish(context.Background(), channel, message).Err()
+	if err != nil {
+		global.Log.Printf("发布更新缓存消息时出错: %v", err)
+		return err
+	}
 	return
 }
 

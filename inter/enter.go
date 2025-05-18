@@ -15,7 +15,6 @@ func GetOrder() Order {
 }
 
 type Order interface {
-	Spikes(c *gin.Context)
 	CreateOrder(userID, goodID uint) (err error)
 	GenerateOrderID(userID, productID uint) string
 	GetOrder(orderID string) (order model.OrderModel, err error)
